@@ -84,24 +84,20 @@
     <Compile Include="ContextMenuRegistrator.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ExtractionStartedEvent.cs" />
-    <Compile Include="ExtractProgressView.xaml.cs">
-      <DependentUpon>ExtractProgressView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Interfaces\IContextMenuRegistrator.cs" />
     <Compile Include="Interfaces\IOptions.cs" />
-    <Compile Include="MainViewModel.cs" />
+    <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="Options.cs" />
-    <Compile Include="OptionsView.xaml.cs">
-      <DependentUpon>OptionsView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="OptionsViewModel.cs" />
+    <Compile Include="ViewModels\OptionsViewModel.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RegistrationExceptionEvent.cs" />
-    <Page Include="ExtractProgressView.xaml">
+    <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="ShowOptionsMessage.cs" />
+    <Page Include="Views\ExtractProgressView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -110,12 +106,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
-    <Compile Include="ExtractProgressViewModel.cs" />
-    <Page Include="MainView.xaml">
+    <Compile Include="ViewModels\ExtractProgressViewModel.cs" />
+    <Page Include="Views\MainView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="OptionsView.xaml">
+    <Page Include="Views\OptionsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ShellView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -134,9 +134,6 @@
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="NLog.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

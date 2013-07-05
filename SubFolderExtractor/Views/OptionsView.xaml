@@ -1,0 +1,29 @@
+﻿<Window x:Name="OptionsWindow" x:Class="SubFolderExtractor.Views.OptionsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Options" Height="110" Width="300" Icon="/SubFolderExtractor;component/extract-icon.ico" >
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="SteelBlue"  Offset="1"/>
+            <GradientStop Color="White" Offset="0"/>
+        </LinearGradientBrush>
+    </Window.Background>
+
+    <Window.Resources>
+        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}" >
+            <Setter Property="Background" Value="LightGray" />
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Vertical" VerticalAlignment="Top">
+            <CheckBox x:Name="RenameToFolder" Content="Rename files to folder" ToolTip="When selected, will rename the extracted file to the folder the compressed file was contained in" />
+            <CheckBox x:Name="DeleteAfterExtract" Content="Delete subfolder after extract" ToolTip="Will delete the subfolder after everything has been extracted to the root folder" />
+            <Button x:Name="ModifyContextMenuRegistration" Content="{Binding ContextMenuRegistrationText, FallbackValue='Context menu register here'}" 
+                Height="25" VerticalAlignment="Bottom" ToolTip="{Binding ContextMenuRegistrationToolTip}" Margin="20,10,40,0" />
+        </StackPanel>
+    </Grid>
+</Window>
