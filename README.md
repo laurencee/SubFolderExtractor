@@ -5,10 +5,10 @@ Extracts files from folders under the selected folder. Supports split compressed
 
 Provides options for renaming extracted files to origin folder and deleting folders after extraction (recycle bin).
 
-Example:
+##Example:
 rootfolder
-  \foo\compressedFileA.zip - contains compressedFileA.avi
-  \bar\compressedFileB.zip - contains compressedFileB.avi
+  foo\compressedFileA.zip - contains compressedFileA.avi
+  bar\compressedFileB.zip - contains compressedFileB.avi
   
 Extraction process without rename:
 rootfolder\compressedFileA.avi
