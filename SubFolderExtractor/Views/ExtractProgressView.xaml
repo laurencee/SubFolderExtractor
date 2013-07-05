@@ -10,19 +10,19 @@
             <GradientStop Color="White" Offset="0"/>
         </LinearGradientBrush>
     </Window.Background>
-    
+
     <Window.Resources>
         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}" >
             <Setter Property="Background" Value="LightGray" />
         </Style>
     </Window.Resources>
-    
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
+
         <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -47,12 +47,12 @@
                 <TextBlock x:Name="CurrentCompressedFile" />
             </StackPanel>
         </Grid>
-        
-        <TextBlock x:Name="Status" Text="Status text goes here" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Row="1" />
+
+        <TextBlock x:Name="Status" FontSize="13" FontWeight="Bold" Text="Status text goes here" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Row="1" />
         <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Grid.Row="1" Height="22">
             <Button x:Name="Cancel" Content="Cancel" Width="60" />
             <Button x:Name="CloseWindow" Content="Close" Width="60" Margin="10,0,0,0" />
         </StackPanel>
-        
+
     </Grid>
 </Window>

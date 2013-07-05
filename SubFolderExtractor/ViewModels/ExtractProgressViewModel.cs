@@ -219,6 +219,7 @@ namespace SubFolderExtractor.ViewModels
             extractionTask.ContinueWith(task =>
             {
                 IsExecuting = false;
+                ProgressIsIndeterminate = false;
                 currentDirectoryCount = totalDirectoriesCount;
                 NotifyOfPropertyChange(() => Progress);
 
@@ -417,7 +418,7 @@ namespace SubFolderExtractor.ViewModels
         private int GetCurrentProgress()
         {
             if (totalDirectoriesCount == 0)
-                return 0;
+                return 100;
 
             int currentProgress = (100 / totalDirectoriesCount) * currentDirectoryCount;
             return currentProgress;
