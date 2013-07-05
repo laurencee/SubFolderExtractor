@@ -96,7 +96,6 @@
     </Compile>
     <Compile Include="RegistrationExceptionEvent.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
-    <Compile Include="ShowOptionsMessage.cs" />
     <Page Include="Views\ExtractProgressView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
