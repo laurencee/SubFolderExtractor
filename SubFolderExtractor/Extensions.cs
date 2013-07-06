@@ -44,8 +44,11 @@ namespace SubFolderExtractor
             if (task == null)
                 return;
 
-            task.ContinueWith(t => Logger.ErrorException(t.Exception.ExtractErrorMessage(), t.Exception),
-                TaskContinuationOptions.OnlyOnFaulted);
+            task.ContinueWith(t =>
+            {
+                if (t.Exception != null)
+                    Logger.ErrorException(t.Exception.ExtractErrorMessage(), t.Exception);
+            });
         }
 
         public static bool IsEqualTo(this string original, string value, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)

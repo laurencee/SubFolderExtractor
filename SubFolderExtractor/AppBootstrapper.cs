@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using Autofac;
 using Caliburn.Micro;
@@ -24,7 +25,7 @@ namespace SubFolderExtractor
             base.ConfigureContainer(builder);
             
             builder.Register<IContextMenuRegistrator>(c => new ContextMenuRegistrator());
-            builder.Register<IOptions>(c => new Options());
+            builder.Register<IOptions>(c => new Options()).SingleInstance();
         }
 
         protected override void OnStartup(object sender, System.Windows.StartupEventArgs e)

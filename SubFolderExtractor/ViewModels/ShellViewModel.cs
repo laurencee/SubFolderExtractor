@@ -6,16 +6,13 @@ namespace SubFolderExtractor.ViewModels
     public class ShellViewModel : Conductor<IScreen>.Collection.OneActive
     {
         private readonly MainViewModel mainViewModel;
-        private readonly OptionsViewModel optionsViewModel;
 
-        public ShellViewModel(MainViewModel mainViewModel, OptionsViewModel optionsViewModel)
+        public ShellViewModel(MainViewModel mainViewModel)
         {
-            this.mainViewModel = mainViewModel;
-            this.optionsViewModel = optionsViewModel;
             if (mainViewModel == null) throw new ArgumentNullException("mainViewModel");
+            this.mainViewModel = mainViewModel;
 
             Items.Add(mainViewModel);
-            Items.Add(optionsViewModel);
         }
 
         protected override void OnActivate()

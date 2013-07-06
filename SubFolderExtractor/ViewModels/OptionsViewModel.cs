@@ -18,10 +18,8 @@ namespace SubFolderExtractor.ViewModels
 
         public OptionsViewModel(IOptions options, IContextMenuRegistrator contextMenuRegistrator)
         {
-            if (options == null)
-                throw new ArgumentNullException("options");
-            if (contextMenuRegistrator == null)
-                throw new ArgumentNullException("contextMenuRegistrator");
+            if (options == null) throw new ArgumentNullException("options");
+            if (contextMenuRegistrator == null) throw new ArgumentNullException("contextMenuRegistrator");
             
             CanModifyContextMenuRegistration = false;
             this.options = options;

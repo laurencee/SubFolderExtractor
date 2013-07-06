@@ -32,6 +32,7 @@ namespace SubFolderExtractor.ViewModels
         private string status;
         private int totalDirectoriesCount;
         private bool progressIsIndeterminate;
+        private string extractionToolFullPath;
 
         public ExtractProgressViewModel(IOptions options,
                                         IEventAggregator eventAggregator)
@@ -366,7 +367,9 @@ namespace SubFolderExtractor.ViewModels
         private Process CreateExtractionProcess(FileInfo compressedFile)
         {
             var extractor = new Process();
-            extractor.StartInfo.FileName = Settings.Default.ExtractionToolPath;
+
+            var extractionToolPath = GetExtractionToolPath();
+            extractor.StartInfo.FileName = extractionToolPath;
             extractor.StartInfo.CreateNoWindow = true;
             extractor.StartInfo.UseShellExecute = false;
             extractor.StartInfo.RedirectStandardOutput = true;
@@ -376,6 +379,23 @@ namespace SubFolderExtractor.ViewModels
             extractor.StartInfo.Arguments = startArgs;
 
             return extractor;
+        }
+
+        private string GetExtractionToolPath()
+        {
+            if (!string.IsNullOrEmpty(extractionToolFullPath))
+                return extractionToolFullPath;
+
+            string extractionToolPath = Settings.Default.ExtractionToolPath;
+
+            if(!Path.IsPathRooted(extractionToolPath))
+            {
+                var executingAssemblyLocation = AppDomain.CurrentDomain.BaseDirectory;
+                extractionToolPath = Path.Combine(executingAssemblyLocation, Settings.Default.ExtractionToolPath);
+            }
+            
+            extractionToolFullPath = Path.GetFullPath(extractionToolPath);
+            return extractionToolFullPath;
         }
 
         private void WaitOnCompletion(Process extractionProcess)
@@ -417,7 +437,7 @@ namespace SubFolderExtractor.ViewModels
 
         private int GetCurrentProgress()
         {
-            if (totalDirectoriesCount == 0)
+            if (totalDirectoriesCount == 0 || totalDirectoriesCount == currentDirectoryCount)
                 return 100;
 
             int currentProgress = (100 / totalDirectoriesCount) * currentDirectoryCount;
