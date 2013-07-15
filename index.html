@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="SubFolder Extractor : " />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>SubFolder Extractor</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/laurencee/SubFolderExtractor">View on GitHub</a>
+
+          <h1 id="project_title">SubFolder Extractor</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/laurencee/SubFolderExtractor/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/laurencee/SubFolderExtractor/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="subfolderextractor" class="anchor" href="#subfolderextractor"><span class="octicon octicon-link"></span></a>SubFolderExtractor</h1>
+
+<p>Extracts files from folders under the selected folder. Supports split compressed files such as </p>
+
+<pre><code>compressedFile_part000.rar
+compressedFile_part001.rar
+compressedFile_part002.rar
+etc.
+</code></pre>
+
+<p>Provides options for renaming extracted files to origin folder and deleting folders after extraction (recycle bin).</p>
+
+<h2>
+<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example:</h2>
+
+<pre><code>rootfolder
+  foo\compressedFileA.zip - contains compressedFileA.avi
+  bar\compressedFileB.zip - contains compressedFileB.avi
+</code></pre>
+
+<p>Extraction process without rename:</p>
+
+<pre><code>rootfolder\compressedFileA.avi
+rootfolder\compressedFileA.avi
+</code></pre>
+
+<p>With Rename on:</p>
+
+<pre><code>rootfolder\foo.avi
+rootfolder\bar.avi
+</code></pre>
+
+<p>Folder deletion can be turned on to delete the foo/bar folders after extraction has finished (occurs per folder extracted, not at the end)</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">SubFolder Extractor maintained by <a href="https://github.com/laurencee">laurencee</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
