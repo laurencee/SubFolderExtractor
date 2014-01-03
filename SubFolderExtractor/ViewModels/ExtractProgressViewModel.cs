@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Caliburn.Micro;
 using Microsoft.VisualBasic.FileIO;
 using SubFolderExtractor.Interfaces;
+using SubFolderExtractor.Model;
 using SubFolderExtractor.Properties;
 using Action = System.Action;
 
@@ -148,25 +149,18 @@ namespace SubFolderExtractor.ViewModels
             Logger.Info("Cancellation requested for {0} - finishing current extraction and then stopping.", RootFolder);
         }
 
-        public void CloseWindow()
-        {
-            this.TryClose();
-        }
-
         /// <summary>
         ///   Starts the extraction process from subfolders to the root folder
         /// </summary>
-        public void StartExtraction(string rootDirectory)
+        public void StartExtraction(string startDirectory)
         {
-            if (!Directory.Exists(rootDirectory))
-                throw new DirectoryNotFoundException(rootDirectory);
+            if (!Directory.Exists(startDirectory))
+                throw new DirectoryNotFoundException(startDirectory);
 
             // Reset execution variables
-            this.rootDirectory = new DirectoryInfo(rootDirectory);
-            fileSystemWatcher = new FileSystemWatcher(this.rootDirectory.FullName)
-            {
-                EnableRaisingEvents = true
-            };
+            this.rootDirectory = new DirectoryInfo(startDirectory);
+            fileSystemWatcher = new FileSystemWatcher(this.rootDirectory.FullName);
+            fileSystemWatcher.EnableRaisingEvents = true;
 
             NotifyOfPropertyChange(() => RootFolder);
             
@@ -180,15 +174,15 @@ namespace SubFolderExtractor.ViewModels
             Task extractionTask = Task.Factory.StartNew(() =>
             {
                 Status = "Running extractions...";
-                foreach (var directoryInfo in this.rootDirectory.GetDirectories())
+                foreach (var compressedDirectoryFiles in GetDirectoriesWithCompressedFiles(rootDirectory))
                 {
                     if (cancellationTokenSource.Token.IsCancellationRequested)
                     {
-                        Logger.Info("Cancel requested, stopping on directory {0}.", directoryInfo.FullName);
+                        Logger.Info("Cancel requested, stopping on directory {0}.", compressedDirectoryFiles.Directory.FullName);
                         break;
                     }
                     
-                    ExtractFromDirectory(directoryInfo);
+                    ExtractFromDirectory(compressedDirectoryFiles);
                     currentDirectoryCount++;
                     ProgressIsIndeterminate = false;
                     NotifyOfPropertyChange(() => Progress);
@@ -196,6 +190,27 @@ namespace SubFolderExtractor.ViewModels
             }, cancellationTokenSource.Token);
 
             CompleteExtraction(extractionTask);
+        }
+
+        private List<CompressedDirectoryFiles> GetDirectoriesWithCompressedFiles(DirectoryInfo baseDirectory, bool recurse = true)
+        {
+            var compressedDirectoryFiles = new List<CompressedDirectoryFiles>();
+            foreach (var compressionExtension in Settings.Default.CompressionExtensions)
+            {
+                string searchFilter = string.Format("*.{0}", compressionExtension);
+                var compressedFiles = rootDirectory.GetFiles(searchFilter);
+
+                if (compressedDirectoryFiles.Any())
+                    compressedDirectoryFiles.Add(new CompressedDirectoryFiles(rootDirectory, compressedFiles));
+            }
+
+            // Recurse subfolders only 1 level depth
+            foreach (var directory in rootDirectory.GetDirectories())
+            {
+                compressedDirectoryFiles.AddRange(GetDirectoriesWithCompressedFiles(directory, recurse: false));
+            }
+
+            return compressedDirectoryFiles;
         }
 
         protected override void OnDeactivate(bool close)
@@ -231,30 +246,16 @@ namespace SubFolderExtractor.ViewModels
             }).IgnoreExceptions();
         }
 
-        private void ExtractFromDirectory(DirectoryInfo directory)
+        private void ExtractFromDirectory(CompressedDirectoryFiles compressedDirectoryFiles)
         {
-            CurrentFolder = directory.FullName;
-            var compressedFiles = new List<FileInfo>();
-            foreach (var compressionExtension in Settings.Default.CompressionExtensions)
-            {
-                string searchFilter = string.Format("*.{0}", compressionExtension);
-                compressedFiles = directory.GetFiles(searchFilter).ToList();
-
-                // Assuming only 1 type of compressed file per folder, additional work needed if assumption changes
-                if (compressedFiles.Any())
-                {
-                    Logger.Info("Extracting from files in folder {0}", CurrentFolder);
-                    break;
-                }
-            }
-
-            compressedFiles = GetUnchainedCompressedFiles(compressedFiles);
+            CurrentFolder = compressedDirectoryFiles.Directory.FullName;
+            var compressedFiles = GetUnchainedCompressedFiles(compressedDirectoryFiles.CompressedFiles);
 
             if (compressedFiles.Any())
             {
                 ExtractFromFiles(compressedFiles);
                 if (cancellationTokenSource.IsCancellationRequested == false && options.DeleteAfterExtract)
-                    DeleteDirectory(directory.FullName);
+                    DeleteDirectory(compressedDirectoryFiles.Directory.FullName);
             }
             else
                 Logger.Info("Skipping folder as it does not contain any known compressed file types {0}", CurrentFolder);
@@ -266,7 +267,7 @@ namespace SubFolderExtractor.ViewModels
         /// </summary>
         /// <param name="fileInfos"> Files to check for any known chain names </param>
         /// <returns> Compressed files that are either the start or are not part of a compression chain </returns>
-        private List<FileInfo> GetUnchainedCompressedFiles(List<FileInfo> fileInfos)
+        private List<FileInfo> GetUnchainedCompressedFiles(FileInfo[] fileInfos)
         {
             var unchainedCompressedFiles = new List<FileInfo>();
 
@@ -294,9 +295,8 @@ namespace SubFolderExtractor.ViewModels
             return unchainedCompressedFiles;
         }
 
-        private void ExtractFromFiles(List<FileInfo> fileInfos)
+        private void ExtractFromFiles(IEnumerable<FileInfo> fileInfos)
         {
-            int count = 0;
             foreach (var fileInfo in fileInfos)
             {
                 if (cancellationTokenSource.Token.IsCancellationRequested)
@@ -307,7 +307,6 @@ namespace SubFolderExtractor.ViewModels
 
                 CurrentCompressedFile = fileInfo.Name;
                 ExtractToRoot(fileInfo);
-                count++;
             }
         }
 

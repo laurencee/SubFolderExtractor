@@ -1,55 +1,78 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using Autofac;
+using System.Windows.Threading;
 using Caliburn.Micro;
-using Caliburn.Micro.Autofac;
 using SubFolderExtractor.Interfaces;
 using SubFolderExtractor.ViewModels;
 
 namespace SubFolderExtractor
 {
-    public class AppBootstrapper : AutofacBootstrapper<ShellViewModel>
-    {
-        protected override void ConfigureBootstrapper()
-        {
-            base.ConfigureBootstrapper();
+	public class AppBootstrapper : BootstrapperBase
+	{
+		SimpleContainer container;
 
-            AutoSubscribeEventAggegatorHandlers = true;
-            EnforceNamespaceConvention = false;
-            ViewModelBaseType = typeof(IScreen);
-        }
+		public AppBootstrapper()
+		{
+			Start();
+		}
 
-        protected override void ConfigureContainer(ContainerBuilder builder)
-        {
-            base.ConfigureContainer(builder);
-            
-            builder.Register<IContextMenuRegistrator>(c => new ContextMenuRegistrator());
-            builder.Register<IOptions>(c => new Options()).SingleInstance();
-        }
+		protected override void Configure()
+		{
+			container = new SimpleContainer();
 
-        protected override void OnStartup(object sender, System.Windows.StartupEventArgs e)
-        {
+			container.Singleton<IWindowManager, WindowManager>();
+			container.Singleton<IEventAggregator, EventAggregator>();
+			container.PerRequest<ShellViewModel>();
+		    container.PerRequest<MainViewModel>();
+		    container.PerRequest<OptionsViewModel>();
+		    container.PerRequest<ExtractProgressViewModel>();
+            container.Singleton<IOptions, Options>();
+		    container.Singleton<IContextMenuRegistrator, ContextMenuRegistrator>();
+		}
+
+		protected override object GetInstance(Type service, string key)
+		{
+			var instance = container.GetInstance(service, key);
+			if (instance != null)
+				return instance;
+
+			throw new InvalidOperationException("Could not locate any instances.");
+		}
+
+		protected override IEnumerable<object> GetAllInstances(Type service)
+		{
+			return container.GetAllInstances(service);
+		}
+
+		protected override void BuildUp(object instance)
+		{
+			container.BuildUp(instance);
+		}
+
+	    protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+	    {
+	        base.OnUnhandledException(sender, e);
+
+            NLog.LogManager.GetCurrentClassLogger().Fatal(e.Exception); // log any unhandled errors
+	    }
+
+	    protected override void OnStartup(object sender, System.Windows.StartupEventArgs e)
+		{
             if (e.Args.Any())
             {
                 ProcessArgs(e.Args);
                 return;
             }
 
-            base.OnStartup(sender, e);
-        }
+			DisplayRootViewFor<ShellViewModel>();
+		}
 
-        protected override void OnUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
-        {
-            base.OnUnhandledException(sender, e);
-            NLog.LogManager.GetCurrentClassLogger().Fatal(e.Exception); // log any unhandled errors
-        }
-        
         private void ProcessArgs(string[] args)
         {
             var rootDirectory = args[0];
             var windowManager = IoC.Get<IWindowManager>();
-            var options = Container.Resolve<IOptions>();
+            var options = IoC.Get<IOptions>();
 
             if (args.Contains("RenameToFolder"))
                 options.RenameToFolder = true;
@@ -68,5 +91,5 @@ namespace SubFolderExtractor
                     Application.Shutdown();
             };
         }
-    }
+	}
 }
