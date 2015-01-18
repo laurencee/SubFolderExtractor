@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
@@ -58,7 +59,7 @@ namespace SubFolderExtractor
             NLog.LogManager.GetCurrentClassLogger().Fatal(e.Exception); // log any unhandled errors
         }
 
-        protected override void OnStartup(object sender, System.Windows.StartupEventArgs e)
+        protected override void OnStartup(object sender, StartupEventArgs e)
         {
             if (e.Args.Any())
             {
@@ -71,7 +72,7 @@ namespace SubFolderExtractor
 
         private void ProcessArgs(string[] args)
         {
-            var rootDirectory = args[0];
+            var rootDirectory = args[0].Trim('"');
             var windowManager = IoC.Get<IWindowManager>();
             var options = IoC.Get<IOptions>();
 
@@ -87,10 +88,15 @@ namespace SubFolderExtractor
             {
                 extractProgressViewModel.StartExtraction(rootDirectory);
             }
+            catch (DirectoryNotFoundException ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Fatal(ex);
+                MessageBox.Show("Directory not found: " + ex.Message, "Directory not found", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             catch (Exception ex)
             {
                 NLog.LogManager.GetCurrentClassLogger().Fatal(ex);
-                MessageBox.Show(ex.ExtractErrorMessage(), "Error occured", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.ToString(), "Error occured", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             // Shutdown the application when execution has completed
