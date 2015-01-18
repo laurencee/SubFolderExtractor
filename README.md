@@ -10,7 +10,7 @@ The extraction process can be launched through the main application or as a righ
 
 ##Example:
 ```
-rootfolder
+rootfolder\
   foo\compressedFileA.zip - contains compressedFileA.avi
   bar\compressedFileB.zip - contains compressedFileB.avi
 ```
@@ -19,6 +19,12 @@ Extraction process without rename:
 ```
 rootfolder\compressedFileA.avi
 rootfolder\compressedFileA.avi
+```
+
+With Rename on:
+```
+rootfolder\foo.avi
+rootfolder\bar.avi
 ```
 
 SubFolderExtractor also supports split compressed files such as 
@@ -30,14 +36,9 @@ etc.
 ```
 
 ## Additional options
-There are additional options for renaming extracted files to origin folder and deleting folders after extraction (recycle bin).
+There are a few other options that can be toggled on or off through the options menu:
+* Rename after extraction
+* Delete after extraction
+* Register context menu action
 
-With Rename on:
-```
-rootfolder\foo.avi
-rootfolder\bar.avi
-```
-
-Folder deletion can be turned on to delete the foo/bar folders after extraction has finished (occurs per folder extracted, not at the end)
-
-As mentioned in the description a context menu action can be added to explorer to allow quick access for sub folder extraction.
+Delete after extraction will delete the subfolders after files have been extracted.
