@@ -202,32 +202,36 @@ namespace SubFolderExtractor.ViewModels
 
             foreach (var directory in baseDirectory.GetDirectories())
             {
-                compressedDirectoryFiles.AddRange(GetCompressedFilesInDirectory(directory));
+                var compresedFilesInDirectory = GetCompressedFilesInDirectory(directory);
+                if (compresedFilesInDirectory.Any()) compressedDirectoryFiles.Add(new CompressedDirectoryFiles(directory, compresedFilesInDirectory));
             }
 
             return compressedDirectoryFiles;
         }
 
-        private List<CompressedDirectoryFiles> GetCompressedFilesInDirectory(DirectoryInfo directory)
+        private List<FileInfo> GetCompressedFilesInDirectory(DirectoryInfo directory)
         {
-            var compressedDirectoryFiles = new List<CompressedDirectoryFiles>();
+            var compressedDirectoryFiles = new List<FileInfo>();
             if (!directory.Exists) return compressedDirectoryFiles;
+
+            var fileInfos = directory.GetFiles();
+            if (fileInfos.Length == 0) return compressedDirectoryFiles;
 
             foreach (var compressionExtension in Settings.Default.CompressionExtensions)
             {
                 // dont add the same file for r00 if we already have a rar file from the same folder
                 // This means we skip r00 when file names are not the same as the rar file but that's not common or very important
                 if (compressionExtension == "r00" &&
-                    compressedDirectoryFiles.Any(x => x.CompressedFiles[0].Extension == ".rar"))
+                    compressedDirectoryFiles.Any(x => x.Extension == ".rar"))
                 {
                     continue;
                 }
 
-                string searchFilter = string.Format("*.{0}", compressionExtension);
-                var compressedFiles = directory.GetFiles(searchFilter);
+                var extension = compressionExtension;
+                var compressedFiles = fileInfos.Where(x => x.Extension == ("." + extension)).ToList();
 
                 if (compressedFiles.Any())
-                    compressedDirectoryFiles.Add(new CompressedDirectoryFiles(directory, compressedFiles));
+                    compressedDirectoryFiles.AddRange(compressedFiles);
             }
 
             return compressedDirectoryFiles;
@@ -287,7 +291,7 @@ namespace SubFolderExtractor.ViewModels
         /// </summary>
         /// <param name="fileInfos"> Files to check for any known chain names </param>
         /// <returns> Compressed files that are either the start or are not part of a compression chain </returns>
-        private List<FileInfo> GetUnchainedCompressedFiles(FileInfo[] fileInfos)
+        private List<FileInfo> GetUnchainedCompressedFiles(List<FileInfo> fileInfos)
         {
             var unchainedCompressedFiles = new List<FileInfo>();
 
