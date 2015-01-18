@@ -35,20 +35,17 @@
 
 <p><a href="https://github.com/laurencee/SubFolderExtractor/releases/latest">Latest release</a></p>
 
-<p>Extracts files from folders under the selected folder. Supports split compressed files such as </p>
+<h2>
+<a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>Description:</h2>
 
-<pre><code>compressedFile_part000.rar
-compressedFile_part001.rar
-compressedFile_part002.rar
-etc.
-</code></pre>
+<p>Extracts files from folders under the specified root folder. </p>
 
-<p>Provides options for renaming extracted files to origin folder and deleting folders after extraction (recycle bin).</p>
+<p>The extraction process can be launched through the main application or as a right click context menu option in explorer on any folder (context menu option can be enable from options menu).</p>
 
 <h2>
 <a id="example" class="anchor" href="#example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example:</h2>
 
-<pre><code>rootfolder
+<pre><code>rootfolder\
   foo\compressedFileA.zip - contains compressedFileA.avi
   bar\compressedFileB.zip - contains compressedFileB.avi
 </code></pre>
@@ -65,7 +62,26 @@ rootfolder\compressedFileA.avi
 rootfolder\bar.avi
 </code></pre>
 
-<p>Folder deletion can be turned on to delete the foo/bar folders after extraction has finished (occurs per folder extracted, not at the end)</p>
+<p>SubFolderExtractor also supports split compressed files such as </p>
+
+<pre><code>compressedFile_part000.rar
+compressedFile_part001.rar
+compressedFile_part002.rar
+etc.
+</code></pre>
+
+<h2>
+<a id="additional-options" class="anchor" href="#additional-options" aria-hidden="true"><span class="octicon octicon-link"></span></a>Additional options</h2>
+
+<p>There are a few other options that can be toggled on or off through the options menu:</p>
+
+<ul>
+<li>Rename after extraction</li>
+<li>Delete after extraction</li>
+<li>Register context menu action</li>
+</ul>
+
+<p>Delete after extraction will delete the subfolders after files have been extracted.</p>
       </section>
       <footer>
         <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
