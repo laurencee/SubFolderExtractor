@@ -18,7 +18,7 @@ namespace SubFolderExtractor.ViewModels
     public class ExtractProgressViewModel : Screen
     {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-        
+
         private readonly IOptions options;
         private readonly IEventAggregator eventAggregator;
 
@@ -58,10 +58,10 @@ namespace SubFolderExtractor.ViewModels
 
         public bool CanCancel
         {
-            get { return IsExecuting && ! cancellationTokenSource.IsCancellationRequested; }
+            get { return IsExecuting && !cancellationTokenSource.IsCancellationRequested; }
         }
 
-        public bool CanCloseWindow
+        public bool CanTryClose
         {
             get { return !IsExecuting; }
         }
@@ -100,8 +100,8 @@ namespace SubFolderExtractor.ViewModels
                 isExecuting = value;
                 NotifyOfPropertyChange(() => IsExecuting);
                 NotifyOfPropertyChange(() => CanCancel);
-                NotifyOfPropertyChange(() => CanCloseWindow);
-                eventAggregator.Publish(new ExtractionStartedEvent(isExecuting));
+                NotifyOfPropertyChange(() => CanTryClose);
+                eventAggregator.PublishOnUIThread(new ExtractionStartedEvent(isExecuting));
             }
         }
 
@@ -139,12 +139,13 @@ namespace SubFolderExtractor.ViewModels
                 NotifyOfPropertyChange(() => Status);
             }
         }
-        
+
         /// <summary>
         ///   Cancels the current extraction process
         /// </summary>
         public void Cancel()
         {
+            Status = "Cancelling...";
             cancellationTokenSource.Cancel();
             Logger.Info("Cancellation requested for {0} - finishing current extraction and then stopping.", RootFolder);
         }
@@ -163,25 +164,28 @@ namespace SubFolderExtractor.ViewModels
             fileSystemWatcher.EnableRaisingEvents = true;
 
             NotifyOfPropertyChange(() => RootFolder);
-            
+
             CreateCancellationTokenSource();
             ProgressIsIndeterminate = true; // Change progress bar to cycle during initial extraction to show extraction in progress
             IsExecuting = true;
-            totalDirectoriesCount = this.rootDirectory.GetDirectories().Count();
             currentDirectoryCount = 0;
 
             Logger.Info("Starting extraction process from root folder {0}", RootFolder);
             Task extractionTask = Task.Factory.StartNew(() =>
             {
+                Status = "Finding directories with compressed files...";
+                var targetDirectories = GetDirectoriesWithCompressedFiles(rootDirectory);
+                totalDirectoriesCount = targetDirectories.Count;
+
                 Status = "Running extractions...";
-                foreach (var compressedDirectoryFiles in GetDirectoriesWithCompressedFiles(rootDirectory))
+                foreach (var compressedDirectoryFiles in targetDirectories)
                 {
                     if (cancellationTokenSource.Token.IsCancellationRequested)
                     {
                         Logger.Info("Cancel requested, stopping on directory {0}.", compressedDirectoryFiles.Directory.FullName);
                         break;
                     }
-                    
+
                     ExtractFromDirectory(compressedDirectoryFiles);
                     currentDirectoryCount++;
                     ProgressIsIndeterminate = false;
@@ -195,19 +199,33 @@ namespace SubFolderExtractor.ViewModels
         private List<CompressedDirectoryFiles> GetDirectoriesWithCompressedFiles(DirectoryInfo baseDirectory, bool recurse = true)
         {
             var compressedDirectoryFiles = new List<CompressedDirectoryFiles>();
-            foreach (var compressionExtension in Settings.Default.CompressionExtensions)
-            {
-                string searchFilter = string.Format("*.{0}", compressionExtension);
-                var compressedFiles = rootDirectory.GetFiles(searchFilter);
-
-                if (compressedDirectoryFiles.Any())
-                    compressedDirectoryFiles.Add(new CompressedDirectoryFiles(rootDirectory, compressedFiles));
-            }
 
             // Recurse subfolders only 1 level depth
-            foreach (var directory in rootDirectory.GetDirectories())
+            if (recurse)
             {
-                compressedDirectoryFiles.AddRange(GetDirectoriesWithCompressedFiles(directory, recurse: false));
+                foreach (var directory in baseDirectory.GetDirectories())
+                {
+                    compressedDirectoryFiles.AddRange(GetDirectoriesWithCompressedFiles(directory, recurse: false));
+                }
+
+                return compressedDirectoryFiles;
+            }
+
+            foreach (var compressionExtension in Settings.Default.CompressionExtensions)
+            {
+                // dont add the same file for r00 if we already have a rar file from the same folder
+                // This means we skip r00 when file names are not the same as the rar file but that's not common or very important
+                if (compressionExtension == "r00" &&
+                    compressedDirectoryFiles.Any(x => x.CompressedFiles[0].Extension == ".rar"))
+                {
+                    continue;
+                }
+
+                string searchFilter = string.Format("*.{0}", compressionExtension);
+                var compressedFiles = baseDirectory.GetFiles(searchFilter);
+
+                if (compressedFiles.Any())
+                    compressedDirectoryFiles.Add(new CompressedDirectoryFiles(baseDirectory, compressedFiles));
             }
 
             return compressedDirectoryFiles;
@@ -387,12 +405,12 @@ namespace SubFolderExtractor.ViewModels
 
             string extractionToolPath = Settings.Default.ExtractionToolPath;
 
-            if(!Path.IsPathRooted(extractionToolPath))
+            if (!Path.IsPathRooted(extractionToolPath))
             {
                 var executingAssemblyLocation = AppDomain.CurrentDomain.BaseDirectory;
                 extractionToolPath = Path.Combine(executingAssemblyLocation, Settings.Default.ExtractionToolPath);
             }
-            
+
             extractionToolFullPath = Path.GetFullPath(extractionToolPath);
             return extractionToolFullPath;
         }
@@ -402,7 +420,7 @@ namespace SubFolderExtractor.ViewModels
             var cancellationRegistration = cancellationTokenSource.Token.Register(() =>
             {
                 if (extractionProcess.HasExited) return;
-                
+
                 try
                 {
                     Logger.Info("Cancellation requested - cancelling extraction process");
@@ -455,12 +473,17 @@ namespace SubFolderExtractor.ViewModels
 
         private void RenameFileToFolder(string extractedFileFullPath, string directoryName)
         {
-            if (!File.Exists(extractedFileFullPath))
-                return;
-            if (Path.GetFileNameWithoutExtension(extractedFileFullPath).IsEqualTo(Path.GetFileName(directoryName)))
+            if (!File.Exists(extractedFileFullPath)) return;
+
+            bool onlyDifferByCase = false;
+            if (Path.GetFileNameWithoutExtension(extractedFileFullPath) == Path.GetFileName(directoryName)) // case sensitive comparison
             {
                 Logger.Info("No need to rename file as it already matches the folder name");
                 return;
+            }
+            if (Path.GetFileNameWithoutExtension(extractedFileFullPath).IsEqualTo(Path.GetFileName(directoryName)))
+            {
+                onlyDifferByCase = true;
             }
 
             var fileInfo = new FileInfo(extractedFileFullPath);
@@ -468,9 +491,16 @@ namespace SubFolderExtractor.ViewModels
             string newFileFullPath = Path.Combine(fileInfo.DirectoryName, newFileName);
 
             Logger.Info("Renaming file from {0} to {1}", Path.GetFileName(extractedFileFullPath), newFileName);
+            
+            if (onlyDifferByCase) // perform case sensitive rename
+            {
+                var tmpName = Path.Combine(fileInfo.DirectoryName, Path.GetRandomFileName());
+                Logger.Info("File names only differ by case, using temporary file to allow case sensitive rename: " + tmpName);
 
-            // Guard against existing file with same name
-            if (File.Exists(newFileFullPath))
+                File.Move(extractedFileFullPath, tmpName);
+                File.Move(tmpName, newFileFullPath);
+            }
+            else if (File.Exists(newFileFullPath)) // Guard against existing file with same name
                 Logger.Error(string.Format("Unable to rename file {0} as a file with the same name already exists", newFileFullPath));
             else
                 File.Move(extractedFileFullPath, newFileFullPath);
