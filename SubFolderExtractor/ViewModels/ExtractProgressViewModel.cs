@@ -174,7 +174,7 @@ namespace SubFolderExtractor.ViewModels
             Task extractionTask = Task.Factory.StartNew(() =>
             {
                 Status = "Finding directories with compressed files...";
-                var targetDirectories = GetDirectoriesWithCompressedFiles(rootDirectory);
+                var targetDirectories = GetSubDirectoriesWithCompressedFiles(rootDirectory);
                 totalDirectoriesCount = targetDirectories.Count;
 
                 Status = "Running extractions...";
@@ -196,20 +196,22 @@ namespace SubFolderExtractor.ViewModels
             CompleteExtraction(extractionTask);
         }
 
-        private List<CompressedDirectoryFiles> GetDirectoriesWithCompressedFiles(DirectoryInfo baseDirectory, bool recurse = true)
+        private List<CompressedDirectoryFiles> GetSubDirectoriesWithCompressedFiles(DirectoryInfo baseDirectory)
         {
             var compressedDirectoryFiles = new List<CompressedDirectoryFiles>();
 
-            // Recurse subfolders only 1 level depth
-            if (recurse)
+            foreach (var directory in baseDirectory.GetDirectories())
             {
-                foreach (var directory in baseDirectory.GetDirectories())
-                {
-                    compressedDirectoryFiles.AddRange(GetDirectoriesWithCompressedFiles(directory, recurse: false));
-                }
-
-                return compressedDirectoryFiles;
+                compressedDirectoryFiles.AddRange(GetCompressedFilesInDirectory(directory));
             }
+
+            return compressedDirectoryFiles;
+        }
+
+        private List<CompressedDirectoryFiles> GetCompressedFilesInDirectory(DirectoryInfo directory)
+        {
+            var compressedDirectoryFiles = new List<CompressedDirectoryFiles>();
+            if (!directory.Exists) return compressedDirectoryFiles;
 
             foreach (var compressionExtension in Settings.Default.CompressionExtensions)
             {
@@ -222,10 +224,10 @@ namespace SubFolderExtractor.ViewModels
                 }
 
                 string searchFilter = string.Format("*.{0}", compressionExtension);
-                var compressedFiles = baseDirectory.GetFiles(searchFilter);
+                var compressedFiles = directory.GetFiles(searchFilter);
 
                 if (compressedFiles.Any())
-                    compressedDirectoryFiles.Add(new CompressedDirectoryFiles(baseDirectory, compressedFiles));
+                    compressedDirectoryFiles.Add(new CompressedDirectoryFiles(directory, compressedFiles));
             }
 
             return compressedDirectoryFiles;
@@ -491,7 +493,7 @@ namespace SubFolderExtractor.ViewModels
             string newFileFullPath = Path.Combine(fileInfo.DirectoryName, newFileName);
 
             Logger.Info("Renaming file from {0} to {1}", Path.GetFileName(extractedFileFullPath), newFileName);
-            
+
             if (onlyDifferByCase) // perform case sensitive rename
             {
                 var tmpName = Path.Combine(fileInfo.DirectoryName, Path.GetRandomFileName());
