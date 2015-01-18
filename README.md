@@ -1,6 +1,8 @@
 SubFolderExtractor
 ==================
 
+[Latest release](https://github.com/laurencee/SubFolderExtractor/releases/latest)
+
 Extracts files from folders under the selected folder. Supports split compressed files such as 
 ```
 compressedFile_part000.rar
