@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Threading;
 using Caliburn.Micro;
 using SubFolderExtractor.Interfaces;
@@ -82,7 +83,15 @@ namespace SubFolderExtractor
             var extractProgressViewModel = IoC.Get<ExtractProgressViewModel>();
 
             windowManager.ShowWindow(extractProgressViewModel);
-            extractProgressViewModel.StartExtraction(rootDirectory);
+            try
+            {
+                extractProgressViewModel.StartExtraction(rootDirectory);
+            }
+            catch (Exception ex)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Fatal(ex);
+                MessageBox.Show(ex.ExtractErrorMessage(), "Error occured", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
             // Shutdown the application when execution has completed
             extractProgressViewModel.PropertyChanged += (sender, propertyChangedEventArgs) =>
