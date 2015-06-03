@@ -115,6 +115,7 @@ namespace SubFolderExtractor.Model
             var targetDirectories = FindCompressedFiles.GetSubDirectoriesWithCompressedFiles(RootDirectory);
             totalDirectoriesCount = targetDirectories.Count;
             NotifyOfPropertyChange(() => MaxProgress);
+            IsExecuting = true;
 
             foreach (var compressedDirectoryFiles in targetDirectories)
             {
@@ -128,6 +129,8 @@ namespace SubFolderExtractor.Model
                 ExtractFromDirectory(compressedDirectoryFiles);
                 NotifyOfPropertyChange(() => Progress);
             }
+
+            IsExecuting = false;
         }
 
         public void Cancel()
@@ -199,25 +202,23 @@ namespace SubFolderExtractor.Model
             currentDirectoryCount++;
             complete = totalDirectoriesCount == currentDirectoryCount;
 
-            if (complete)
-                IsExecuting = false;
-            else
+            if (!complete)
                 autoResetEvent.Set(); // allow the next extraction to start (if there is one)
         }
 
-    private void ExtractionProgress(object sender, ProgressEventArgs e)
-    {
-        e.Cancel = cancel;
-        percentDone = e.PercentDone;
-        NotifyOfPropertyChange(() => Progress);
-    }
+        private void ExtractionProgress(object sender, ProgressEventArgs e)
+        {
+            e.Cancel = cancel;
+            percentDone = e.PercentDone;
+            NotifyOfPropertyChange(() => Progress);
+        }
 
-    private int GetCurrentProgress()
-    {
-        if (totalDirectoriesCount == 0 || totalDirectoriesCount == currentDirectoryCount || complete)
-            return MaxProgress;
+        private int GetCurrentProgress()
+        {
+            if (totalDirectoriesCount == 0 || totalDirectoriesCount == currentDirectoryCount || complete)
+                return MaxProgress;
 
-        return (currentDirectoryCount * 100) + percentDone;
+            return (currentDirectoryCount * 100) + percentDone;
+        }
     }
-}
 }
