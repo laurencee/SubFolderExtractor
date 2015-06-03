@@ -130,7 +130,7 @@ namespace SubFolderExtractor.Model
                 NotifyOfPropertyChange(() => Progress);
             }
 
-            IsExecuting = false;
+            if (totalDirectoriesCount == 0) IsExecuting = false;
         }
 
         public void Cancel()
@@ -204,6 +204,8 @@ namespace SubFolderExtractor.Model
 
             if (!complete)
                 autoResetEvent.Set(); // allow the next extraction to start (if there is one)
+            else
+                IsExecuting = false;
         }
 
         private void ExtractionProgress(object sender, ProgressEventArgs e)
