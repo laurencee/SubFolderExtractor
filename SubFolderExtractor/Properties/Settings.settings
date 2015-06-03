@@ -2,6 +2,12 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SubFolderExtractor.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
+    <Setting Name="RenameToFolder" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="DeleteAfterExtract" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
     <Setting Name="CompressionExtensions" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
@@ -11,23 +17,11 @@
   &lt;string&gt;7z&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
-    <Setting Name="ExtractionToolPath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">7zip\7z.exe</Value>
-    </Setting>
-    <Setting Name="RenameToFolder" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
     <Setting Name="ChainedFileRegularExpressions" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
   &lt;string&gt;.*part\d+.rar&lt;/string&gt;
 &lt;/ArrayOfString&gt;</Value>
-    </Setting>
-    <Setting Name="DeleteAfterExtract" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="ExtractionCommand" Type="System.String" Scope="User">
-      <Value Profile="(Default)">x "[CompressedFile]" -o"[Destination]" -y</Value>
     </Setting>
   </Settings>
 </SettingsFile>

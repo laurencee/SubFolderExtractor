@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Caliburn.Micro;
 using SubFolderExtractor.Interfaces;
+using SubFolderExtractor.Model;
 using SubFolderExtractor.ViewModels;
 
 namespace SubFolderExtractor
@@ -29,6 +30,7 @@ namespace SubFolderExtractor
             container.PerRequest<MainViewModel>();
             container.PerRequest<OptionsViewModel>();
             container.PerRequest<ExtractProgressViewModel>();
+            container.PerRequest<ExtractionModel>();
             container.Singleton<IOptions, Options>();
             container.Singleton<IContextMenuRegistrator, ContextMenuRegistrator>();
         }
@@ -100,10 +102,13 @@ namespace SubFolderExtractor
             }
 
             // Shutdown the application when execution has completed
-            extractProgressViewModel.PropertyChanged += (sender, propertyChangedEventArgs) =>
+            var model = extractProgressViewModel.Model;
+            model.PropertyChanged += (sender, propertyChangedEventArgs) =>
             {
-                if (propertyChangedEventArgs.PropertyName == "IsExecuting" && !extractProgressViewModel.IsExecuting)
+                if (propertyChangedEventArgs.PropertyName == nameof(model.IsExecuting) && !model.IsExecuting)
+                {
                     Application.Shutdown();
+                }
             };
         }
     }
