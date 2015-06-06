@@ -91,7 +91,7 @@ namespace SubFolderExtractor.ViewModels
             ProgressIsIndeterminate = true; // Change progress bar to cycle during initial extraction to show extraction in progress
             cancel = false;
 
-            Logger.Info("Starting extraction process from root folder {0}", RootFolder);
+            Logger.Info("Starting extraction process from root folder {0}", startDirectory);
             Status = "Running extractions...";
             Task.Factory.StartNew(() => Model.StartExtraction(startDirectory));
         }
