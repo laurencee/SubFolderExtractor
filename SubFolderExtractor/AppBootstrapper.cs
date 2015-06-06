@@ -18,6 +18,12 @@ namespace SubFolderExtractor
         public AppBootstrapper()
         {
             Initialize();
+            if (Properties.Settings.Default.UpgradeSettings) // ensure settings are retained between version updates
+            {
+                Properties.Settings.Default.Upgrade();
+                Properties.Settings.Default.UpgradeSettings = false;
+                Properties.Settings.Default.Save();
+            }
         }
 
         protected override void Configure()
