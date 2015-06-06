@@ -76,6 +76,7 @@ namespace SubFolderExtractor.ViewModels
         public void Cancel()
         {
             Status = "Cancelling...";
+            cancel = true;
             Model.Cancel();
             Logger.Info("Cancellation requested for {0} - finishing current extraction and then stopping.", RootFolder);
         }

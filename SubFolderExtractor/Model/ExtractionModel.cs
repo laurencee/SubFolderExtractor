@@ -136,6 +136,7 @@ namespace SubFolderExtractor.Model
         public void Cancel()
         {
             cancel = true;
+            NotifyOfPropertyChange(() => CanCancel);
         }
 
         public void ExtractFromDirectory(CompressedDirectoryFiles compressedDirectoryFiles)
@@ -158,6 +159,7 @@ namespace SubFolderExtractor.Model
                 if (cancel)
                 {
                     Logger.Info("Extraction for file {0} cancelled.", fileInfo.FullName);
+                    autoResetEvent.Set();
                     return;
                 }
 
@@ -181,7 +183,6 @@ namespace SubFolderExtractor.Model
             IsExecuting = true;
             extractedFileFullPath = Path.Combine(RootDirectory.FullName, e.FileInfo.FileName);
             e.Cancel = cancel;
-            percentDone = e.PercentDone;
             NotifyOfPropertyChange(() => Progress);
         }
 
@@ -189,7 +190,10 @@ namespace SubFolderExtractor.Model
         {
             extractor.Dispose();
             if (cancel)
+            {
                 IOLibrary.DeleteFile(extractedFileFullPath);
+                IsExecuting = false;
+            }
             else
             {
                 if (options.RenameToFolder)
@@ -202,10 +206,12 @@ namespace SubFolderExtractor.Model
             currentDirectoryCount++;
             complete = totalDirectoriesCount == currentDirectoryCount;
 
-            if (!complete)
-                autoResetEvent.Set(); // allow the next extraction to start (if there is one)
-            else
+            if (complete)
                 IsExecuting = false;
+            else
+                autoResetEvent.Set(); // allow the next extraction to start (if there is one)
+
+            NotifyOfPropertyChange(() => Progress);
         }
 
         private void ExtractionProgress(object sender, ProgressEventArgs e)
